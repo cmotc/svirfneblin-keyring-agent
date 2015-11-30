@@ -107,6 +107,16 @@ Passphrase: $(<$HOME/.svirf-tmp/localkeypw)
     dialog --title "$SVIRF_KEY_GEN" --yesno "$STEP_SIX" 8 78 2> "$HOME/.svirf-tmp/agentbool"
     dialog --title "$SVIRF_KEY_GEN" --inputbox "$STEP_SEVEN" 8 78 2> "$HOME/.svirf-tmp/agenttimeout"
     rm -rf "$HOME/.svirf-tmp/"
+    . $HOME/.userrc
+    dialog --title "$SVIRF_KEY_GEN" --inputbox "$STEP_EIGHT" 8 78 2> "$HOME/.svirf-tmp/mailaddress"
+    dialog --title "$SVIRF_KEY_GEN" --inputbox "$STEP_NINE" 8 78 2> "$HOME/.svirf-tmp/mailusername"
+    dialog --title "$SVIRF_KEY_GEN" --inputbox "$STEP_TEN" 8 78 2> "$HOME/.svirf-tmp/mailserver"
+    dialog --title "$SVIRF_KEY_GEN" --passwordbox "$STEP_ELEVEN" 8 78 2> "$HOME/.svirf-tmp/mailpassword"
+    touch $HOME/.spoolfile
+    # One more thing we'll want to do in here is specify the default as seen by .muttrc.
+    touch $HOME/.wifi_passwords
+    gpg --encrypt --recipient $VERY_PRIVATE_KEY_WIFI $HOME/.spoolfile --output $HOME/.spoolfile.gpg
+    gpg --encrypt --recipient $VERY_PRIVATE_KEY_WIFI $HOME/.wifi_passwords --output $HOME/.wifi_passwords.gpg
     . torsocks off
 }
 
