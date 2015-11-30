@@ -37,11 +37,11 @@ STEP_FIVE="Enter a password for the local security key:"
 STEP_SIX="Next we'll decide on some rules for how those keys are managed. In
 the next few steps, you'll decide how long these keys stay unlocked after you
 enter the password. By default, they'll last for the life of the terminal you
-unlock them in."
+unlock them in.
 
-STEP_SEVEN="Would you like to use gpg-agent to manage your keys?"
+Would you like to use gpg-agent to manage your keys?"
 
-STEP_EIGHT="How long would you like it to take before you have to re-enter your
+STEP_SEVEN="How long would you like it to take before you have to re-enter your
 gpg key's password?"
 
 if [ -f /usr/share/whiptail ]; then
@@ -104,12 +104,10 @@ Passphrase: $(<$HOME/.svirf-tmp/localkeypw)
     gpg --batch --gen-key "$HOME/.svirf-tmp/localkeytmp"
     SUPER_SECRET_KEY=$(gpg --list-keys $(<"$HOME/.svirf-tmp/localkeyname"))
     echo -n "VERY_PRIVATE_KEY_WIFI=$SUPER_SECRET_KEY[1]" >> $HOME/.userrc
-    dialog --title "$SVIRF_KEY_GEN" --msgbox "$STEP_SIX" 8 78 &> /dev/null
-    dialog --title "$SVIRF_KEY_GEN" --inputbox "$STEP_SEVEN" 8 78 2> "$HOME/.svirf-tmp/"
-    dialog --title "$SVIRF_KEY_GEN" --inputbox "$STEP_EIGHT" 8 78 2> "$HOME/.svirf-tmp/"
-
+    dialog --title "$SVIRF_KEY_GEN" --yesno "$STEP_SIX" 8 78 2> "$HOME/.svirf-tmp/agentbool"
+    dialog --title "$SVIRF_KEY_GEN" --inputbox "$STEP_SEVEN" 8 78 2> "$HOME/.svirf-tmp/agenttimeout"
     rm -rf "$HOME/.svirf-tmp/"
     . torsocks off
 }
 
-terminator -x ". /usr/share/svirfneblin-keyring-generate && key_run_me"
+key_run_me
