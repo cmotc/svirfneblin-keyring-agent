@@ -1,0 +1,115 @@
+#! /bin/sh
+
+SVIRF_KEY_GEN="Svirfneblin Keyring Manager Generation"
+
+STEP_ZERO="This script will generate a new set of encryption keys for you to 
+use with this computer and integrate it with your desktop configuration. If you 
+already have encryption keys you want to use, then set them up as you prefer."
+
+STEP_ONE="First, we're going to generate a GPG key for you to use with your 
+regular email. This key will be used by mutt for signing and encrypting 
+messages.
+
+Please enter the email you want to use with this key:
+"
+
+STEP_TWO="Enter a password for the key we're about to generate"
+
+STEP_THREE="Would you like to make your key discoverable by uploading it to a
+keyserver? This will make it easier for people to verify that a message came
+from you, and make it easier for them to send encrypted messages to you. If you
+skip this step, you will need to share your keys by hand."
+
+STEP_FOUR="Next we're going to generate a second key which will be used for
+keeping some information used by the system encrypted. This includes network
+keys and your email login details for now, but additional uses will be added
+as the need arises.
+
+If you use this step, a wrapper script will be installed which you can use as a
+shortcut to use the key called svirf-gpg. All it does is specify the key to use,
+otherwise it's just gpg-as-usual.
+
+Please enter the name you want to use for this key.
+"
+
+STEP_FIVE="Enter a password for the local security key:"
+
+STEP_SIX="Next we'll decide on some rules for how those keys are managed. In
+the next few steps, you'll decide how long these keys stay unlocked after you
+enter the password. By default, they'll last for the life of the terminal you
+unlock them in."
+
+STEP_SEVEN="Would you like to use gpg-agent to manage your keys?"
+
+STEP_EIGHT="How long would you like it to take before you have to re-enter your
+gpg key's password?"
+
+if [ -f /usr/share/whiptail ]; then
+    alias dialog=whiptail
+elif [ -f /usr/share/dialog ]; then
+    alias dialog="dialog --color"
+elif [ -f /usr/share/xdialog ]; then
+    if [ "$USE_GUI_DIALOGS" == "yes" ]; then
+        alias dialog=xdialog
+    fi
+elif [ -f /usr/share/zenity ]; then 
+    if [ "$USE_GUI_DIALOGS" == "yes" ]; then
+        alias dialog=zenity
+    fi
+fi
+
+SRM_WARNING="This program uses files to manage sensitive data, data which should
+be overwritten as thoroughly as possible. Please install the srm secure removal
+tools \"srm\" before running this script."
+
+if [ -f "/usr/bin/srm" ]; then
+    alias rm=srm
+else
+    dialog --title "$SVIRF_KEY_GEN" --msgbox "$SRM_WARNING" 8 78 &> /dev/null
+    exit 1
+fi
+
+key_run_me(){
+    . torsocks on
+    mkdir -p "$HOME/.svirf-tmp/"
+    dialog --title "$SVIRF_KEY_GEN" --msgbox "$STEP_ZERO" 8 78 &> /dev/null
+    dialog --title "$SVIRF_KEY_GEN" --inputbox "$STEP_ONE" 8 78 2> "$HOME/.svirf-tmp/muttkeyname"
+    dialog --title "$SVIRF_KEY_GEN" --passwordbox "$STEP_TWO" 8 78 2> "$HOME/.svirf-tmp/muttkeypw"
+    echo "%echo Generating an OpenPGP key for encrypting and signing emails
+Key-Type: default
+Key-Length: 4096
+Name-Real: $(<$HOME/.svirf-tmp/muttkeyname)
+Name-Comment: 
+Name-Email: $(<$HOME/.svirf-tmp/muttkeyname)
+Expire-Date: 0
+Passphrase: $(<$HOME/.svirf-tmp/muttkeypw)
+%commit
+%echo done" > "$HOME/.svirf-tmp/muttkeytmp"
+    gpg --batch --gen-key "$HOME/.svirf-tmp/muttkeytmp"
+    MUTT_KEY=$(gpg --list-keys $(<"$HOME/.svirf-tmp/muttkeyname"))
+    echo -n "EMAIL_GPG_KEY=$MUTT_KEY[1]" >> $HOME/.userrc
+    dialog --title "$SVIRF_KEY_GEN" --yesno "$STEP_THREE" 8 78 2> "$HOME/.svirf-tmp/muttkeypublish"
+    dialog --title "$SVIRF_KEY_GEN" --inputbox "$STEP_FOUR" 8 78 2> "$HOME/.svirf-tmp/localkeyname"
+    dialog --title "$SVIRF_KEY_GEN" --passwordbox "$STEP_FIVE" 8 78 2> "$HOME/.svirf-tmp/localkeypw"
+    echo "%echo Generating an OpenPGP key for encrypting local information
+Key-Type: default
+Key-Length: 4096
+Name-Real: $(<$HOME/.svirf-tmp/localkeyname)
+Name-Comment: 
+Name-Email: $(<$HOME/.svirf-tmp/localkeyname)
+Expire-Date: 0
+Passphrase: $(<$HOME/.svirf-tmp/localkeypw)
+%commit
+%echo done" > "$HOME/.svirf-tmp/localkeytmp"
+    gpg --batch --gen-key "$HOME/.svirf-tmp/localkeytmp"
+    SUPER_SECRET_KEY=$(gpg --list-keys $(<"$HOME/.svirf-tmp/localkeyname"))
+    echo -n "VERY_PRIVATE_KEY_WIFI=$SUPER_SECRET_KEY[1]" >> $HOME/.userrc
+    dialog --title "$SVIRF_KEY_GEN" --msgbox "$STEP_SIX" 8 78 &> /dev/null
+    dialog --title "$SVIRF_KEY_GEN" --inputbox "$STEP_SEVEN" 8 78 2> "$HOME/.svirf-tmp/"
+    dialog --title "$SVIRF_KEY_GEN" --inputbox "$STEP_EIGHT" 8 78 2> "$HOME/.svirf-tmp/"
+
+    rm -rf "$HOME/.svirf-tmp/"
+    . torsocks off
+}
+
+terminator -x ". /usr/share/svirfneblin-keyring-generate && key_run_me"
