@@ -58,7 +58,7 @@ Homepage: https://www.github.com/cmotc/svirfneblin-keyring-agent
 
 Package: $DEBFOLDER
 Architecture: all
-Depends: lightdm, lightdm-gtk-greeter, awesome (>= 3.4), svirfneblin-panel \${misc:Depends}
+Depends: lightdm, lightdm-gtk-greeter, awesome (>= 3.4), gpg, gpg-agent, ssh, ssh-agent, svirfneblin-panel \${misc:Depends}
 Description: A keyring agent widget for svirfneblin
 " > debian/control
 
