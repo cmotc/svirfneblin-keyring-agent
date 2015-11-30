@@ -44,6 +44,22 @@ Would you like to use gpg-agent to manage your keys?"
 STEP_SEVEN="How long would you like it to take before you have to re-enter your
 gpg key's password?"
 
+STEP_EIGHT="Now we're going to configure mutt with an encrypted login username
+and password file.
+
+What is the default email address you would like to use with Mutt? Default is
+the email you used to generate your GPG key."
+
+STEP_NINE="What is the username required by your email account? If it's the same
+as the full email address, leave this field blank and it will be filled in
+automatically."
+
+STEP_TEN="What is the mail server you need to log in to?(Some nice defaults will
+be added here soon."
+
+STEP_ELEVEN="What is the password to your email account? This will be disposed of
+as soon as the encryption process is complete."
+
 if [ -f /usr/share/whiptail ]; then
     alias dialog=whiptail
 elif [ -f /usr/share/dialog ]; then
