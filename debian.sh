@@ -10,7 +10,8 @@ DEBFOLDER=svirfneblin-keyring-agent
 
 DEBVERSION=$(date +%Y%m%d)
 
-cd "$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+TOME="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+cd $TOME
 
 git pull origin master
 
@@ -22,7 +23,7 @@ rm -rf $DEBFOLDERNAME
 mkdir $DEBFOLDERNAME
 
 # Copy your script to the source dir
-cp -R $SOURCEBINPATH/ $DEBFOLDERNAME/
+cp -R $TOME $DEBFOLDERNAME/
 cd $DEBFOLDERNAME
 
 pwd
