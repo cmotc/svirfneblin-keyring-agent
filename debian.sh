@@ -19,9 +19,6 @@ cd $TOME
 
 git pull origin master
 
-DEBFOLDERNAME="$TOME/../$DEBFOLDER-$DEBVERSION"
-DEBPACKAGENAME=$DEBFOLDER\_$DEBVERSION
-
 rm -rf $DEBFOLDERNAME
 # Create your scripts source dir
 mkdir $DEBFOLDERNAME
